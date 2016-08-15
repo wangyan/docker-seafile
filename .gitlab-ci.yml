@@ -1,0 +1,21 @@
+image: docker:latest
+
+services:
+- docker:dind
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.git.dmfy.gov.cn
+
+variables:
+  CONTAINER_REF_IMAGE: registry.git.dmfy.gov.cn/wangyan/docker-seafile:$CI_BUILD_REF_NAME
+  CONTAINER_LATEST_IMAGE: registry.git.dmfy.gov.cn/wangyan/docker-seafile:latest
+
+build:
+  stage: build
+  script:
+    - docker build --pull -t $CONTAINER_REF_IMAGE .
+    - docker push $CONTAINER_REF_IMAGE
+    - docker tag $(docker images -q $CONTAINER_REF_IMAGE) $CONTAINER_LATEST_IMAGE
+    - docker push $CONTAINER_LATEST_IMAGE 
+  only:
+    - tags
