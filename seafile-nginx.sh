@@ -179,20 +179,6 @@ NIhWl6NEtaFHkvfKo489yCmh607EtF/I/xuohH5hHfsMDCVdVbqETw==
 -----END RSA PRIVATE KEY-----
 EOF
 
-# Nginx runit
-mkdir -p /etc/service/nginx/log
-
-cat > /etc/service/nginx/run<<-EOF
-#!/bin/sh
-exec 2>&1
-exec /usr/sbin/nginx -c /etc/nginx/nginx.conf  -g "daemon off;"
-EOF
-
-cat > /etc/service/nginx/log/run<<-EOF
-#!/bin/sh
-set -e
-LOG=/var/log/runit/nginx
-test -d "\$LOG" || mkdir -p "\$LOG" && exec svlogd -tt "\$LOG"
-EOF
-
-chmod +x /etc/service/nginx/run /etc/service/nginx/log/run
+# APT Clean
+apt -y autoremove && apt-get clean && \
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

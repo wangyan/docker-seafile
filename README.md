@@ -9,17 +9,25 @@
 **debian**
 
 ```shell
-apt-get update && apt-get -y install curl && \
-curl -sSL https://get.daocloud.io/docker | sh
+apt-get update && \
+apt-get -y install curl && \
+curl -fsSL https://get.daocloud.io/docker | sh \
+update-rc.d -f docker defaults && \
+service docker start
 ```
 
  **CentOS**
 
 ```shel
-curl -sSL https://get.daocloud.io/docker | sh
+yum update && \
+curl -fsSL https://get.docker.com/ | sh && \
+systemctl enable docker.service && \
+systemctl start docker.service
 ```
 
 ## 二、安装 MySQL 数据库
+
+**如果你想使用内置的数据库，请忽略步骤(二)(三)(四)，直接跳到步骤(五)**
 
 > 注意将`123456`换成你的MySQL Root密码
 
@@ -33,14 +41,16 @@ docker run --name mysql \
 
 ## 三、安装 phpMyAdmin (可选)
 
+> **温馨提示：**国内主机请将 `idiswy/phpmyadmin:latest` 换成 `docker.wangyan.org/root/docker-phpmyadmin:latest`
+
 ```shell
 docker run --name phpmyadmin \
 --link mysql:mysql \
--p 10086:80 \
--d registry.git.dmfy.gov.cn/wangyan/docker-phpmyadmin:latest
+-p 8080:80 \
+-P -d idiswy/phpmyadmin:latest
 ```
 
-## 四、安装 Seafile
+## 四、安装 Seafile （外部数据库）
 
 - `IP_OR_DOMAIN` 服务器IP或者域名
 - `SEAFILE_ADMIN` 创建 Seafile 管理员账号
@@ -48,6 +58,8 @@ docker run --name phpmyadmin \
 - `SQLSEAFILEPW` Seafile 数据库密码
 
 > 注意：如果有防火墙，请务必开放8082端口，用于客户端同步。
+> 国内主机请将 `idiswy/seafile:latest` 换成 `docker.wangyan.org/root/docker-seafile:latest`
+> 国内主机可增加`-e APT_MIRRORS=aliyun` 选项，使用国内的镜像源。
 
 ```shell
 docker run --name seafile \
@@ -60,16 +72,51 @@ docker run --name seafile \
 -e SEAFILE_ADMIN_PW=123456 \
 -e SQLSEAFILEPW=123456 \
 -v /home/seafile:/opt/seafile \
--d registry.git.dmfy.gov.cn/wangyan/docker-seafile
+-d idiswy/seafile
 ```
+
+安装可能需要 1 分钟左右，通过下面方法查看安装进度。
 
 ```shell
 docker logs -f seafile //查看安装进度
 ```
 
-## 五、常见操作
+## 五、安装 Seafile （内置数据库）
 
-### 5.1 进入容器
+**如果你想使用外部数据库，请返回到步骤（二）安装**
+
+- `MYSQL_ROOT_PASSWORD` MySQL Root 密码
+- `IP_OR_DOMAIN` 服务器IP或者域名
+- `SEAFILE_ADMIN` 创建 Seafile 管理员账号
+- `SEAFILE_ADMIN_PW`  Seafile 管理员密码
+- `SQLSEAFILEPW` Seafile 数据库密码
+
+> 注意：如果有防火墙，请务必开放8082端口，用于客户端同步。
+> 国内主机请将 `idiswy/seafile:latest` 换成 `docker.wangyan.org/root/docker-seafile:latest`
+> 国内主机可增加`-e APT_MIRRORS=aliyun` 选项，使用国内的镜像源。
+
+```shell
+docker run --name seafile \
+-p 8082:8082 \
+-p 80:80 \
+-p 443:443 \
+-e MYSQL_ROOT_PASSWORD=123456 \
+-e IP_OR_DOMAIN=cloud.wangyan.org \
+-e SEAFILE_ADMIN=info@wangyan.org \
+-e SEAFILE_ADMIN_PW=123456 \
+-e SQLSEAFILEPW=123456 \
+-v /home/seafile:/opt/seafile \
+-d idiswy/seafile
+```
+安装可能需要 5 分钟左右，通过下面方法查看安装进度。
+
+```shell
+docker logs -f seafile //查看安装进度
+```
+
+## 六、常见操作
+
+### 6.1 进入容器
 
 首先，安装个小工具
 
@@ -90,7 +137,7 @@ docker-bash seafile
 - `nginx 配置文件` /etc/nginx/conf.d/seafile.conf
 - `seafile 配置文件` /opt/seafile/conf/
 
-### 5.2 重启操作
+### 6.2 重启操作
 
 重启 nginx（nginx 修改配置文件后，需要重启）
 
@@ -104,7 +151,7 @@ sv reload nginx
 /etc/init.d/seafile restart
 ```
 
-## 六、系统设置(可选)
+## 七、系统设置(可选)
 
 ### 6.1. 解决Debian本地化问题
 
@@ -124,7 +171,7 @@ EOF
 locale-gen "zh_CN.UTF-8" && dpkg-reconfigure locales
 ```
 
-### 6.2.设置中国时区
+### 7.2.设置中国时区
 
 **Debbian** 
 
@@ -144,7 +191,7 @@ imedatectl set-timezone Asia/Shanghai
 timedatectl set-ntp yes 
 ```
 
-### 6.3.安装 FUSE 扩展
+### 7.3.安装 FUSE 扩展
 
 ```shell
 mkdir -p /data/seafile-fuse && \
@@ -152,7 +199,7 @@ mkdir -p /data/seafile-fuse && \
 ./seaf-fuse.sh stop //停止
 ```
 
-## 七、了解更多
+## 八、了解更多
 
 关于`Seafile`更多信息，请访问其官网。<http://manual.seafile.com/>
 

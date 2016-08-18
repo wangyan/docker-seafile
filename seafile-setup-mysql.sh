@@ -2,6 +2,19 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 export PATH TERM=xterm
 set -x
+clear
+echo "#############################################################"
+echo "# Seafile Auto Setup Script"
+echo "# Env: Debian/Ubuntu"
+echo "# Intro: http://wangyan.org/"
+echo "#"
+echo "# Copyright (c) 2016, WangYan <i@wangyan.org>"
+echo "# All rights reserved."
+echo "# Distributed under the GNU General Public License, version 3.0."
+echo "#"
+echo "#############################################################"
+echo
+
 # -------------------------------------------
 # Vars Don't touch these unless you really know what you are doing!
 # -------------------------------------------
@@ -34,10 +47,10 @@ SRC_DOCS_DIR=${INSTALLPATH}/seafile/docs/
 # Seafile DB
 # -------------------------------------------
 
-SEAFILE_SQL_USER=$(mysql -hmysql -p$MYSQL_PORT_3306_TCP_PORT -uroot -p$MYSQL_ENV_MYSQL_ROOT_PASSWORD -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = 'seafile')")
+SEAFILE_SQL_USER=$(mysql -h127.0.0.1 -p3306 -uroot -p$MYSQL_ROOT_PASSWORD -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = 'seafile')")
 
 if [ "$SEAFILE_SQL_USER" = "1" ];then
-    mysql -hmysql -p$MYSQL_PORT_3306_TCP_PORT -uroot -p$MYSQL_ENV_MYSQL_ROOT_PASSWORD -sse "DROP USER 'seafile'@'%'"
+    mysql -h127.0.0.1 -p3306 -uroot -p$MYSQL_ROOT_PASSWORD -sse "DROP USER 'seafile'@'%'"
 fi
 
 [ -z "$SQLSEAFILEPW" ] && SQLSEAFILEPW=$(pwgen)
@@ -55,7 +68,7 @@ GRANT ALL PRIVILEGES ON seafile_db.* TO 'seafile'@'%';
 GRANT ALL PRIVILEGES ON seafile_seahub.* TO 'seafile'@'%';
 EOF
 
-mysql -hmysql -p$MYSQL_PORT_3306_TCP_PORT -uroot -p$MYSQL_ENV_MYSQL_ROOT_PASSWORD <<EOF
+mysql -h127.0.0.1 -p3306 -uroot -p$MYSQL_ROOT_PASSWORD <<EOF
 source /tmp/create_tables.sql;
 use seafile_seahub;
 source ${INSTALLPATH}/seahub/sql/mysql.sql;
@@ -81,8 +94,8 @@ cat >> ${DEFAULT_CONF_DIR}/ccnet.conf <<EOF
 
 [Database]
 ENGINE = mysql
-HOST = mysql
-PORT = $MYSQL_PORT_3306_TCP_PORT
+HOST = 127.0.0.1
+PORT = 3306
 USER = seafile
 PASSWD = $SQLSEAFILEPW
 DB = seafile_ccnet
@@ -117,8 +130,8 @@ DATABASES = {
         'NAME': 'seafile_seahub',
         'USER': 'seafile',
         'PASSWORD': '$SQLSEAFILEPW',
-        'HOST': 'mysql',
-        'PORT': $MYSQL_PORT_3306_TCP_PORT
+        'HOST': '127.0.0.1',
+        'PORT': 3306
     }
 }
 
@@ -151,8 +164,8 @@ cat >> ${DEFAULT_CONF_DIR}/seafile.conf <<EOF
 
 [database]
 type = mysql
-host = mysql
-port = $MYSQL_PORT_3306_TCP_PORT
+host = 127.0.0.1
+port = 3306
 user = seafile
 password = $SQLSEAFILEPW
 db_name = seafile_db
