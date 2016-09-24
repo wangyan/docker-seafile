@@ -41,7 +41,7 @@ docker run --name mysql \
 
 ## 三、安装 phpMyAdmin (可选)
 
-> **温馨提示：**国内主机请将 `idiswy/phpmyadmin:latest` 换成 `docker.wangyan.org/root/docker-phpmyadmin:latest`
+> **温馨提示：**国内主机请将 `idiswy/phpmyadmin:latest` 换成 `docker.wangyan.org/docker/phpmyadmin:latest`
 
 ```shell
 docker run --name phpmyadmin \
@@ -58,7 +58,7 @@ docker run --name phpmyadmin \
 - `SQLSEAFILEPW` Seafile 数据库密码
 
 > 注意：如果有防火墙，请务必开放8082端口，用于客户端同步。
-> 国内主机请将 `idiswy/seafile:latest` 换成 `docker.wangyan.org/root/docker-seafile:latest`
+> 国内主机请将 `idiswy/seafile:latest` 换成 `docker.wangyan.org/docker/seafile:latest`
 > 国内主机可增加`-e APT_MIRRORS=aliyun` 选项，使用国内的镜像源。
 
 ```shell
@@ -92,7 +92,7 @@ docker logs -f seafile //查看安装进度
 - `SQLSEAFILEPW` Seafile 数据库密码
 
 > 注意：如果有防火墙，请务必开放8082端口，用于客户端同步。
-> 国内主机请将 `idiswy/seafile:latest` 换成 `docker.wangyan.org/root/docker-seafile:latest`
+> 国内主机请将 `idiswy/seafile:latest` 换成 `docker.wangyan.org/docker/seafile:latest`
 > 国内主机可增加`-e APT_MIRRORS=aliyun` 选项，使用国内的镜像源。
 
 ```shell
